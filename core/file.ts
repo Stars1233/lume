@@ -18,6 +18,9 @@ export class Page<D extends Data = Data> {
   /** Used to save the page data */
   data: D = {} as D;
 
+  /** Whether this page comes from a copied file with site.copy() */
+  isCopy = false;
+
   /** The page content (string or Uint8Array) */
   #content?: Content;
 
@@ -132,8 +135,14 @@ export class Page<D extends Data = Data> {
 }
 
 export class StaticFile<D extends Data = Data> {
+  /** The src info */
   src: Required<Src>;
+
+  /** Used to save the contextual data */
   data: D = {} as D;
+
+  /** Whether this file must be copied with site.copy() */
+  isCopy = false;
 
   static create(
     data: Partial<Data> & { url: string },
@@ -152,6 +161,7 @@ export class StaticFile<D extends Data = Data> {
     const { content } = await this.src.entry.getContent(binaryLoader);
     const page = Page.create(this.data, this.src);
     page.content = content as Uint8Array;
+    page.isCopy = this.isCopy;
     return page;
   }
 
@@ -275,4 +285,18 @@ export interface Data extends RawData {
    * @see https://lume.land/plugins/multilanguage/
    */
   alternates?: Data[];
+}
+
+/** Promote files to pages */
+export async function filesToPages(
+  files: StaticFile[],
+  pages: Page[],
+  filter: (file: StaticFile) => boolean,
+): Promise<void> {
+  const toRemove: StaticFile[] = files.filter(filter);
+
+  for (const file of toRemove) {
+    pages.push(await file.toPage());
+    files.splice(files.indexOf(file), 1);
+  }
 }

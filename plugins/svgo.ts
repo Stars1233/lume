@@ -1,6 +1,7 @@
 import { optimize } from "../deps/svgo.ts";
 import { merge } from "../core/utils/object.ts";
-import { log } from "../core/utils/log.ts";
+import { warnUntil } from "../core/utils/log.ts";
+import { bytes, percentage } from "../core/utils/format.ts";
 
 import type Site from "../core/site.ts";
 import type { Page } from "../core/file.ts";
@@ -25,21 +26,39 @@ export function svgo(userOptions?: Options) {
     site.process([".svg"], SVGProcessor);
 
     function SVGProcessor(files: Page[]) {
-      if (files.length === 0) {
-        log.info(
-          "[lightningcss plugin] No CSS files found. Make sure to add the CSS files with <gray>site.add()</gray>",
-        );
+      const hasPages = warnUntil(
+        "[lightningcss plugin] No CSS files found. Make sure to add the CSS files with <code>site.add()</code>",
+        files.length,
+      );
+
+      if (!hasPages) {
         return;
       }
 
+      const item = site.debugBar?.buildItem(
+        "[svgo plugin] optimization completed",
+      );
+
       for (const file of files) {
         const path = site.src(file.outputPath);
-        const result = optimize(file.text, {
+        const content = file.text;
+        const { data } = optimize(content, {
           path,
           ...options.options,
         }) as { data: string };
 
-        file.content = result.data;
+        if (item) {
+          item.items ??= [];
+          const old = content.length;
+          const optimized = data.length;
+
+          item.items.push({
+            title: `[${percentage(old, optimized)}] ${file.data.url}`,
+            details: `${bytes(optimized)}`,
+          });
+        }
+
+        file.content = data;
       }
     }
   };

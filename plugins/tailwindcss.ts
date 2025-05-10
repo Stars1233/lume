@@ -1,6 +1,6 @@
 import { compile, Scanner, specifier } from "../deps/tailwindcss.ts";
 import { merge } from "../core/utils/object.ts";
-import { log } from "../core/utils/log.ts";
+import { log, warnUntil } from "../core/utils/log.ts";
 import { dirname, posix } from "../deps/path.ts";
 import { readFile } from "../core/utils/read.ts";
 
@@ -43,11 +43,12 @@ export function tailwindCSS(userOptions?: Options) {
     });
 
     site.process([".css"], async (files) => {
-      if (files.length === 0) {
-        log.info(
-          "[tailwindcss plugin] No CSS files found. Make sure to add the CSS files with <gray>site.add()</gray>",
-        );
-        content = [];
+      const hasPages = warnUntil(
+        "[tailwindcss plugin] No CSS files found. Make sure to add the CSS files with <code>site.add()</code>",
+        files.length,
+      );
+
+      if (!hasPages) {
         return;
       }
 
@@ -63,6 +64,7 @@ export function tailwindCSS(userOptions?: Options) {
               const mod = await import(id);
               return {
                 base,
+                path: id,
                 module: mod.default,
               };
             }
@@ -70,39 +72,43 @@ export function tailwindCSS(userOptions?: Options) {
               const mod = await import(`npm:${id}`);
               return {
                 base,
+                path: id,
                 module: mod.default,
               };
             }
+            log.fatal(`[tailwindcss plugin] Cannot resolve module '${id}'`);
             throw new Error(`Cannot resolve module '${id}'`);
           },
           async loadStylesheet(id, base) {
             if (id === "tailwindcss") {
-              const url = `${specifier}/index.css`;
-              const content = await readFile(url);
-              return { content, base };
+              const path = `${specifier}/index.css`;
+              const content = await readFile(path);
+              return { content, path, base };
             }
 
             if (id.startsWith("tailwindcss/")) {
               const filename = id.replace("tailwindcss/", "");
-              const url = `${specifier}/${filename}`;
-              const content = await readFile(url);
-              return { content, base };
+              const path = `${specifier}/${filename}`;
+              const content = await readFile(path);
+              return { content, path, base };
             }
 
             if (options.includes === false) {
               if (!id.startsWith(".")) {
+                log.fatal(`[tailwindcss plugin] Cannot resolve module '${id}'`);
                 throw new Error(`Cannot resolve module '${id}'`);
               }
             }
 
-            const filename = resolveInclude(id, options.includes || "", base);
-            const content = await site.getContent(filename, false);
+            const path = resolveInclude(id, options.includes || "", base);
+            const content = await site.getContent(path, false);
 
             if (content === undefined) {
-              throw new Error(`File ${filename} not found`);
+              log.fatal(`[tailwindcss plugin] File ${path} not found`);
+              throw new Error(`File ${path} not found`);
             }
 
-            return { content, base: dirname(filename) };
+            return { content, path, base: dirname(path) };
           },
         });
 

@@ -6,15 +6,26 @@ and this project try to adheres to [Semantic Versioning](https://semver.org/).
 Go to the `v2` branch to see the changelog of Lume 2.
 Go to the `v1` branch to see the changelog of Lume 1.
 
-## 3.0.0 - Unreleased
+## [3.0.1] - 2025-05-10
 ### Added
-- `site.add()` support URLs and NPM specifiers.
-- `await` filter for nunjucks.
+- Reintroduced `site.copy()` function removed in 3.0.0, because it's still useful in specific scenarios.
+- More info in the debugbar from minify_html, esbuild, terser, postcss, lightningcss, google_fonts and svgo plugins.
+
+### Fixed
+- Warning message by the transform_images plugin.
+- Don't ignore `/.well-known` folders.
+- Updated dependencies: `tailwindcss`, `unocss`, `lume-bar` and some icons.
+
+## [3.0.0] - 2025-05-07
+### Added
+- New `site.add()` with support URLs and NPM specifiers.
+- New debugbar for development mode.
 - New options `cssFile`, `jsFile` and `fontsFolder` to configure a default destination for automatic generated code.
   It's used by default by code_highlight, google_fonts, prism and unocss.
   It's also used by default by components.
 - New folder-based components.
 - Components: allow to define default data values in components.
+- `await` filter for nunjucks.
 - `page.text` and `page.bytes` getters and setters.
 - `site.process(callback)` as an alias of `site.process("*", callback)`.
 - `site.preprocess(callback)` as an alias of `site.preprocess("*", callback)`.
@@ -25,6 +36,7 @@ Go to the `v1` branch to see the changelog of Lume 1.
 - `icons` plugin: Added css.gg and radix-ui.com/icons [#736]
 - `feed` plugin: Allow to pass an array of options or a function that return an array of options.
 - `sitemap` plugin: New option `stylesheet`.
+- Deno lint plugin.
 
 ### Changed
 - `Temporal` API is enabled by default.
@@ -64,6 +76,9 @@ Go to the `v1` branch to see the changelog of Lume 1.
   - Renamed `get()` to `getBytes()` for consistency with `getText()`
   - New method `remove()`.
   - Changed the signature of `getText()` and `getBytes()`.
+- `renderOrder` property is not applied to page layouts [#749].
+- unocss plugin: Used presetWind3 as default.
+- renamed the `isRedirect` property created by redirects plugin to `unlisted`.
 
 ### Removed
 - `jsx_preact` plugin. Use `jsx` instead.
@@ -94,8 +109,19 @@ Go to the `v1` branch to see the changelog of Lume 1.
 - Log an error if prism and codeHighlight plugins are registered at the same time [#497].
 - Updated all dependencies to the latest version.
 - Plugin sheets: UTF-8 characters in .csv files.
+- Search plugin: Sorting when some pages lack key fields [#748]
+- json_ld plugin: alias to non-string value causes an error.
+- transform_images: preserve the animation between gif and webp formats [#750].
+- Set `LUME_LIVE_RELOAD` env variable in the CMS environment
+- check_urls plugin: Handle correctly the spaces and other escaped characters.
 
 [#497]: https://github.com/lumeland/lume/issues/497
 [#660]: https://github.com/lumeland/lume/issues/660
 [#736]: https://github.com/lumeland/lume/issues/736
 [#740]: https://github.com/lumeland/lume/issues/740
+[#748]: https://github.com/lumeland/lume/issues/748
+[#749]: https://github.com/lumeland/lume/issues/749
+[#750]: https://github.com/lumeland/lume/issues/750
+
+[3.0.1]: https://github.com/lumeland/lume/compare/v3.0.0...v3.0.1
+[3.0.0]: https://github.com/lumeland/lume/releases/tag/v3.0.0
