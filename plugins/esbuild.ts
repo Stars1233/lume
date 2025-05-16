@@ -1,6 +1,7 @@
 import { getPathAndExtension, normalizePath } from "../core/utils/path.ts";
 import { merge } from "../core/utils/object.ts";
-import { log } from "../core/utils/log.ts";
+import { log, warnUntil } from "../core/utils/log.ts";
+import { bytes } from "../core/utils/format.ts";
 import {
   build,
   BuildOptions,
@@ -117,6 +118,7 @@ export function esbuild(userOptions?: Options) {
         sourcemap,
       };
 
+      buildOptions.plugins = [...options.options.plugins || []];
       buildOptions.plugins!.push(
         {
           name: "lume-loader",
@@ -133,12 +135,13 @@ export function esbuild(userOptions?: Options) {
                 };
               }
 
-              if (path.startsWith(".")) {
-                if (resolveDir) {
-                  return {
-                    path: join(resolveDir, path),
-                  };
-                }
+              if (
+                kind === "import-statement" && path.startsWith(".") &&
+                resolveDir
+              ) {
+                return {
+                  path: join(resolveDir, path),
+                };
               }
             });
 
@@ -190,7 +193,20 @@ export function esbuild(userOptions?: Options) {
     }
 
     site.process(options.extensions, async (pages, allPages) => {
+      const hasPages = warnUntil(
+        `[esbuild plugin] No ${
+          options.extensions.map((e) => e.slice(1).toUpperCase()).join(", ")
+        } files found. Use <code>site.add()</code> to add files. For example: <code>site.add("script.js")</code>`,
+        pages.length,
+      );
+
+      if (!hasPages) {
+        return;
+      }
+
       const [outputFiles, metafile, enableSourceMap] = await runEsbuild(pages);
+
+      const item = site.debugBar?.buildItem("[esbuild plugin] build completed");
 
       // Save the output code
       for (const [outputPath, output] of Object.entries(metafile.outputs)) {
@@ -254,6 +270,19 @@ export function esbuild(userOptions?: Options) {
           saveAsset(site, page, content, map?.text);
           allPages.push(page);
           continue;
+        }
+
+        if (item) {
+          item.items ??= [];
+          item.items.push({
+            title: normalizedOutPath,
+            details: bytes(outputFile.contents.length),
+            items: Object.entries(output.inputs)
+              .map(([title, { bytesInOutput }]) => ({
+                title,
+                details: bytes(bytesInOutput),
+              })),
+          });
         }
 
         // The page is an entry point

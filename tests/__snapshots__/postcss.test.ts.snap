@@ -210,6 +210,7 @@ summary{display:list-item}
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
@@ -274,6 +275,7 @@ summary{display:list-item}
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
@@ -408,7 +410,70 @@ snapshot[`Postcss plugin (without includes) 1`] = `
 
 snapshot[`Postcss plugin (without includes) 2`] = `[]`;
 
-snapshot[`Postcss plugin (without includes) 3`] = `[]`;
+snapshot[`Postcss plugin (without includes) 3`] = `
+[
+  {
+    content: '@import "variables.css";
+@import "./text.css";
+',
+    data: {
+      basename: "index",
+      mergedKeys: [
+        "tags",
+      ],
+      page: [
+        "src",
+        "data",
+        "isCopy",
+      ],
+      paginate: "paginate",
+      search: [],
+      tags: "Array(0)",
+      url: "/index.min.css",
+    },
+    src: {
+      ext: ".css",
+      path: "/index.min",
+      remote: undefined,
+    },
+  },
+  {
+    content: '@import "npm:modern-normalize@2.0.0";
+
+.text {
+  font-family: var(--font-family);
+
+  & p {
+    color: var(--color);
+    box-shadow: 0 0 0.5em var(--background);
+    -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+  }
+}
+',
+    data: {
+      basename: "text",
+      mergedKeys: [
+        "tags",
+      ],
+      page: [
+        "src",
+        "data",
+        "isCopy",
+      ],
+      paginate: "paginate",
+      search: [],
+      tags: "Array(0)",
+      url: "/text.css",
+    },
+    src: {
+      ext: ".css",
+      path: "/text",
+      remote: undefined,
+    },
+  },
+]
+`;
 
 snapshot[`postcss plugin with hooks 1`] = `
 {
@@ -543,6 +608,7 @@ snapshot[`postcss plugin with hooks 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
@@ -557,3 +623,137 @@ snapshot[`postcss plugin with hooks 3`] = `
   },
 ]
 `;
+
+snapshot[`postcss plugin with copy() 1`] = `
+{
+  formats: [
+    {
+      engines: 0,
+      ext: ".page.toml",
+      isPage: true,
+      loader: [AsyncFunction: toml],
+    },
+    {
+      engines: 1,
+      ext: ".page.ts",
+      isPage: true,
+      loader: [AsyncFunction: module],
+    },
+    {
+      engines: 1,
+      ext: ".page.js",
+      isPage: true,
+      loader: [AsyncFunction: module],
+    },
+    {
+      engines: 0,
+      ext: ".page.jsonc",
+      isPage: true,
+      loader: [AsyncFunction: json],
+    },
+    {
+      engines: 0,
+      ext: ".page.json",
+      isPage: true,
+      loader: [AsyncFunction: json],
+    },
+    {
+      dataLoader: [AsyncFunction: json],
+      engines: 0,
+      ext: ".json",
+      loader: [AsyncFunction: json],
+    },
+    {
+      dataLoader: [AsyncFunction: json],
+      engines: 0,
+      ext: ".jsonc",
+      loader: [AsyncFunction: json],
+    },
+    {
+      engines: 1,
+      ext: ".md",
+      isPage: true,
+      loader: [AsyncFunction: text],
+    },
+    {
+      engines: 1,
+      ext: ".markdown",
+      isPage: true,
+      loader: [AsyncFunction: text],
+    },
+    {
+      dataLoader: [AsyncFunction: module],
+      engines: 1,
+      ext: ".js",
+      loader: [AsyncFunction: module],
+    },
+    {
+      dataLoader: [AsyncFunction: module],
+      engines: 1,
+      ext: ".ts",
+      loader: [AsyncFunction: module],
+    },
+    {
+      engines: 1,
+      ext: ".vento",
+      isPage: true,
+      loader: [AsyncFunction: text],
+    },
+    {
+      engines: 1,
+      ext: ".vto",
+      isPage: true,
+      loader: [AsyncFunction: text],
+    },
+    {
+      dataLoader: [AsyncFunction: toml],
+      engines: 0,
+      ext: ".toml",
+      loader: [AsyncFunction: toml],
+    },
+    {
+      dataLoader: [AsyncFunction: yaml],
+      engines: 0,
+      ext: ".yaml",
+      isPage: true,
+      loader: [AsyncFunction: yaml],
+    },
+    {
+      dataLoader: [AsyncFunction: yaml],
+      engines: 0,
+      ext: ".yml",
+      isPage: true,
+      loader: [AsyncFunction: yaml],
+    },
+    {
+      ext: ".css",
+    },
+  ],
+  src: [
+    "/",
+    "/_includes",
+    "/_includes/components",
+    "/_includes/components/foo.css",
+    "/_includes/variables.css",
+    "/index.min.css",
+    "/text.css",
+  ],
+}
+`;
+
+snapshot[`postcss plugin with copy() 2`] = `
+[
+  {
+    entry: "/index.min.css",
+    flags: [],
+    outputPath: "/new.css",
+  },
+  {
+    entry: "/text.css",
+    flags: [],
+    outputPath: "/text.css",
+  },
+]
+`;
+
+snapshot[`postcss plugin with copy() 3`] = `[]`;

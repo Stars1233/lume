@@ -9,7 +9,7 @@ import { compileStringAsync } from "../deps/sass.ts";
 import { fromFileUrl, posix, toFileUrl } from "../deps/path.ts";
 import { Page } from "../core/file.ts";
 import { prepareAsset, saveAsset } from "./source_maps.ts";
-import { log } from "../core/utils/log.ts";
+import { warnUntil } from "../core/utils/log.ts";
 
 import type Site from "../core/site.ts";
 import type { StringOptions } from "../deps/sass.ts";
@@ -57,10 +57,12 @@ export function sass(userOptions?: Options) {
     site.process([".scss", ".sass"], sassProcessor);
 
     function sassProcessor(files: Page[]) {
-      if (files.length === 0) {
-        log.info(
-          "[sass plugin] No CSS files found. Make sure to add the CSS files with <gray>site.add()</gray>",
-        );
+      const hasPages = warnUntil(
+        "[sass plugin] No SCSS or SASS files found. Make sure to add them with <code>site.add()</code>",
+        files.length,
+      );
+
+      if (!hasPages) {
         return;
       }
 

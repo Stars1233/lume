@@ -5,10 +5,12 @@ import { resolveInclude } from "../core/utils/path.ts";
 import { readFile } from "../core/utils/read.ts";
 import { Page } from "../core/file.ts";
 import { prepareAsset, saveAsset } from "./source_maps.ts";
-import { log } from "../core/utils/log.ts";
+import { warnUntil } from "../core/utils/log.ts";
+import { bytes } from "../core/utils/format.ts";
 
 import type Site from "../core/site.ts";
 import type { SourceMap } from "./source_maps.ts";
+import type { Item } from "../deps/debugbar.ts";
 
 export interface Options {
   /**
@@ -69,17 +71,23 @@ export function postCSS(userOptions?: Options) {
     site.filter("postcss", filter, true);
 
     function postCSSProcessor(files: Page[]) {
-      if (files.length === 0) {
-        log.info(
-          "[postcss plugin] No CSS files found. Make sure to add the CSS files with <gray>site.add()</gray>",
-        );
+      const hasPages = warnUntil(
+        "[postcss plugin] No CSS files found. Make sure to add the CSS files with <code>site.add()</code>",
+        files.length,
+      );
+
+      if (!hasPages) {
         return;
       }
 
-      return concurrent(files, postCss);
+      const item = site.debugBar?.buildItem(
+        "[postcss plugin] processing completed",
+      );
+
+      return concurrent(files, (file) => postCss(file, item));
     }
 
-    async function postCss(file: Page) {
+    async function postCss(file: Page, item?: Item) {
       const { content, filename, sourceMap, enableSourceMap } = prepareAsset(
         site,
         file,
@@ -95,6 +103,18 @@ export function postCSS(userOptions?: Options) {
 
       // Process the code with PostCSS
       const result = await runner.process(content, { from: filename, to, map });
+
+      if (item) {
+        item.items ??= [];
+        item.items.push({
+          title: file.data.url,
+          details: bytes(result.css.length),
+          items: result.warnings().map((warning) => ({
+            title: warning.toString(),
+            context: "warning",
+          })),
+        });
+      }
 
       saveAsset(
         site,

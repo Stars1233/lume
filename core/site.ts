@@ -19,11 +19,12 @@ import Searcher from "./searcher.ts";
 import Scripts from "./scripts.ts";
 import FSWatcher from "../core/watcher.ts";
 import { FSWriter } from "./writer.ts";
-import { Page } from "./file.ts";
+import { filesToPages, Page } from "./file.ts";
 import textLoader from "./loaders/text.ts";
 import binaryLoader from "./loaders/binary.ts";
 import Server from "./server.ts";
 import Cache from "./cache.ts";
+import DebugBar from "./debugbar.ts";
 import notFound from "../middlewares/not_found.ts";
 
 import type { Loader } from "./fs.ts";
@@ -135,6 +136,9 @@ export default class Site {
   // deno-lint-ignore no-explicit-any
   hooks: Record<string, (...args: any[]) => void> = {};
 
+  /** The debug bar data */
+  debugBar?: DebugBar;
+
   /** The generated pages are stored here */
   readonly pages: Page[] = [];
 
@@ -235,6 +239,19 @@ export default class Site {
     // Initialize the cache if LUME_NOCACHE is not enabled
     if (env<boolean>("LUME_NOCACHE") !== true) {
       this.cache = new Cache({ folder: this.root("_cache") });
+    }
+
+    // Initialize the debug bar
+    const initDebugBar = this.options.server.debugBar ??
+      env<boolean>("LUME_LIVE_RELOAD");
+
+    if (initDebugBar) {
+      const debugBar = new DebugBar({
+        url: typeof initDebugBar === "string" ? initDebugBar : undefined,
+      });
+      this.addEventListener("beforeUpdate", () => debugBar.clear());
+      this.debugBar = debugBar;
+      log.collection = debugBar.collection("Build");
     }
 
     // Create the fetch function for `deno serve`
@@ -481,6 +498,27 @@ export default class Site {
     from: string | string[],
     to?: string | Destination,
   ): this {
+    this.#addOrCopy(from, to, false);
+    return this;
+  }
+
+  /** Copy files or directories to the site */
+  copy(from: string, to?: string | Destination): this;
+  copy(from: string[], to?: Destination): this;
+  copy(
+    from: string | string[],
+    to?: string | Destination,
+  ): this {
+    this.#addOrCopy(from, to, true);
+    return this;
+  }
+
+  /** Add or copy files or directories to the site */
+  #addOrCopy(
+    from: string | string[],
+    to: string | Destination | undefined,
+    copy: boolean,
+  ): void {
     // File extensions
     if (Array.isArray(from)) {
       if (typeof to === "string") {
@@ -490,10 +528,10 @@ export default class Site {
       }
       const dest = typeof to === "function" ? to : (path: string) => path;
       for (const ext of from) {
-        this.source.addFile(ext, dest);
+        this.source.addFile(ext, dest, copy);
         this.formats.set({ ext });
       }
-      return this;
+      return;
     }
 
     // Remote files
@@ -521,8 +559,8 @@ export default class Site {
       }
 
       this.remoteFile(to, url.href);
-      this.source.addFile(to, to);
-      return this;
+      this.source.addFile(to, to, copy);
+      return;
     }
 
     // It's a path
@@ -532,8 +570,11 @@ export default class Site {
       );
     }
 
-    this.source.addFile(from, to ?? ((str: string) => str));
-    return this;
+    this.source.addFile(
+      normalizePath(from),
+      to ?? ((str: string) => str),
+      copy,
+    );
   }
 
   /** Ignore one or several files or directories */
@@ -679,6 +720,14 @@ export default class Site {
    * The common operations of build and update
    */
   async #buildPages(pages: Page[]): Promise<boolean> {
+    // Promote the files that must be preprocessed to pages
+    const preExtensions = this.preprocessors.extensions;
+    await filesToPages(
+      this.files,
+      pages,
+      (file) => !file.isCopy && preExtensions.has(file.src.ext),
+    );
+
     if (await this.dispatchEvent({ type: "beforeRender", pages }) === false) {
       return false;
     }
@@ -748,7 +797,11 @@ export default class Site {
 
     // Promote the files that must be processed to pages
     const extensions = this.processors.extensions;
-    await this.filesToPages((file) => extensions.has(file.src.ext));
+    await filesToPages(
+      this.files,
+      this.pages,
+      (file) => !file.isCopy && extensions.has(file.src.ext),
+    );
 
     // Run the processors to the pages
     await this.processors.run(this.pages);
@@ -763,22 +816,6 @@ export default class Site {
     );
 
     return await this.dispatchEvent({ type: "beforeSave" });
-  }
-
-  /** Promote a file to page. */
-  async filesToPages(filter: (file: StaticFile) => boolean): Promise<void> {
-    const toRemove: StaticFile[] = [];
-
-    for (const file of this.files) {
-      if (filter(file)) {
-        this.pages.push(await file.toPage());
-        toRemove.push(file);
-      }
-    }
-
-    for (const file of toRemove) {
-      this.files.splice(this.files.indexOf(file), 1);
-    }
   }
 
   /** Return the URL of a path */
@@ -1029,6 +1066,12 @@ export interface ServerOptions {
 
   /** The file to serve on 404 error */
   page404: string;
+
+  /**
+   * Whether to use the debug bar or not
+   * Use a string to specify a custom URL of the <lume-bar> web component
+   */
+  debugBar?: string | boolean;
 
   /** Optional for the server */
   middlewares: Middleware[];
