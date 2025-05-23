@@ -3,6 +3,7 @@ import { posix } from "../deps/path.ts";
 import loader from "../core/loaders/text.ts";
 import { merge } from "../core/utils/object.ts";
 import { normalizePath } from "../core/utils/path.ts";
+import { log } from "../core/utils/log.ts";
 
 import type Site from "../core/site.ts";
 import type { Data } from "../core/file.ts";
@@ -199,7 +200,9 @@ function compTag(
   // Components are always async
   // so convert automatically {{ comp.whatever }} to {{ await comp.whatever }}
   if (code.startsWith("comp.")) {
-    return `${output} += await ${code};`;
+    const value = `await ${code}`;
+    const val = env.compileFilters(tokens, value, env.options.autoescape);
+    return `${output} += ${val};`;
   }
 
   if (!code.startsWith("comp ")) {
@@ -227,6 +230,7 @@ function compTag(
   compiled.push(...env.compileTokens(tokens, tmpOutput, ["/comp"]));
 
   if (tokens.length && (tokens[0][0] !== "tag" || tokens[0][1] !== "/comp")) {
+    log.fatal(`[vento plugin] Missing closing tag for component "${comp}"`);
     throw new Error(`Missing closing tag for component tag: ${code}`);
   }
 

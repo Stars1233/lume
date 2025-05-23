@@ -2,7 +2,6 @@
 export const pluginNames = [
   // Order doesn't matter, but should be first
   "attributes",
-  "toml",
   "date",
   "code_highlight",
   "decap_cms",
@@ -27,6 +26,7 @@ export const pluginNames = [
   "sheets",
   "filter_pages",
   "redirects",
+  "icons",
 
   // CSS + JS + source maps
   "esbuild",
@@ -35,9 +35,9 @@ export const pluginNames = [
   "google_fonts",
   "sass",
   "unocss",
-  "lightningcss",
-  "postcss",
   "tailwindcss",
+  "postcss",
+  "lightningcss",
   "purgecss",
   "source_maps",
 

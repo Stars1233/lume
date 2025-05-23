@@ -10,6 +10,8 @@ import {
   yellow,
 } from "../../deps/colors.ts";
 
+import type { Collection, Item } from "../../deps/debugbar.ts";
+
 const severity = {
   TRACE: 1,
   DEBUG: 5,
@@ -34,6 +36,7 @@ const logFormats: Record<string, (str: string) => string> = {
   red,
   Red: (str: string) => bold(red(str)),
   gray,
+  code: gray,
   Gray: (str: string) => bold(gray(str)),
   green: brightGreen,
   Green: (str: string) => bold(brightGreen(str)),
@@ -41,6 +44,7 @@ const logFormats: Record<string, (str: string) => string> = {
   Yellow: (str: string) => bold(yellow(str)),
   del: (str: string) => strikethrough(gray(str)),
   em: italic,
+  strong: bold,
 };
 
 /**
@@ -49,9 +53,14 @@ const logFormats: Record<string, (str: string) => string> = {
  */
 class Logger {
   #level: number;
+  #collection: Collection | undefined;
 
   constructor(level: LevelName) {
     this.#level = severity[level];
+  }
+
+  set collection(collection: Collection) {
+    this.#collection = collection;
   }
 
   get level(): number {
@@ -83,18 +92,21 @@ class Logger {
     console.log(msg);
   }
 
-  fatal(msg: string): void {
+  fatal(msg: string, items?: string[] | Item[]): void {
+    this.#bar(msg, "fatal", items);
     this.#log(msg, severity.FATAL);
   }
 
-  error(msg: string): void {
+  error(msg: string, items?: string[] | Item[]): void {
     if (this.#level < severity.FATAL) {
+      this.#bar(msg, "error", items);
       this.#log(msg, severity.ERROR);
     }
   }
 
-  warn(msg: string): void {
+  warn(msg: string, items?: string[] | Item[]): void {
     if (this.#level < severity.ERROR) {
+      this.#bar(msg, "warn", items);
       this.#log(msg, severity.WARN);
     }
   }
@@ -116,6 +128,38 @@ class Logger {
       this.#log(msg, severity.TRACE);
     }
   }
+
+  #bar(title: string, context?: string, items?: string[] | Item[]): void {
+    const collection = this.#collection;
+
+    if (collection) {
+      collection.items.push({
+        context,
+        title,
+        items: items?.map((item) =>
+          typeof item === "string" ? { title: item } : item
+        ),
+      });
+    }
+  }
 }
 
 export const log = new Logger(level);
+
+const withValue = new Set<string>();
+/**
+ * Log a message only while the condition is false.
+ * This is useful to avoid logging an error message in a update
+ * where the number of pages to process may be reduced.
+ */
+export function warnUntil(message: string, condition: unknown): boolean {
+  if (withValue.has(message)) {
+    return !!condition;
+  }
+  if (condition) {
+    withValue.add(message);
+    return true;
+  }
+  log.warn(message);
+  return false;
+}

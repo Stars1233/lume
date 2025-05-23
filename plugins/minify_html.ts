@@ -1,6 +1,7 @@
 import { minify } from "../deps/minify_html.ts";
 import { merge } from "../core/utils/object.ts";
 import { log } from "../core/utils/log.ts";
+import { bytes, percentage } from "../core/utils/format.ts";
 
 import type { Options as MinifyOptions } from "../deps/minify_html.ts";
 import type Site from "../core/site.ts";
@@ -23,8 +24,6 @@ export const defaults: Options = {
     keep_html_and_head_opening_tags: false,
     keep_spaces_between_attributes: true,
     keep_comments: false,
-    minify_js: true,
-    minify_css: true,
     remove_bangs: false,
     remove_processing_instructions: false,
   },
@@ -48,11 +47,29 @@ export function minifyHTML(userOptions?: Options) {
     );
   }
 
+  options.options.minify_css ??= options.extensions?.includes(".css");
+  options.options.minify_js ??= options.extensions?.includes(".js");
+
   return (site: Site) => {
     site.process(options.extensions, (pages) => {
+      const item = site.debugBar?.buildItem(
+        "[minify_html plugin] minification completed",
+      );
+
       for (const page of pages) {
         try {
-          page.bytes = minify(page.bytes, options.options);
+          const content = page.bytes;
+          page.bytes = minify(content, options.options);
+          if (item) {
+            item.items ??= [];
+            const old = content.length;
+            const minified = page.bytes.length;
+
+            item.items.push({
+              title: `[${percentage(old, minified)}] ${page.data.url}`,
+              details: `${bytes(page.bytes.length)}`,
+            });
+          }
         } catch (error) {
           log.error(
             `[minify-html plugin] Error minifying ${page.sourcePath}: ${error}`,

@@ -1,5 +1,6 @@
 import { getPathAndExtension } from "../core/utils/path.ts";
-import { log } from "../core/utils/log.ts";
+import { filesToPages } from "../core/file.ts";
+import { log, warnUntil } from "../core/utils/log.ts";
 import { merge } from "../core/utils/object.ts";
 import { concurrent } from "../core/utils/concurrent.ts";
 import sharp, { create } from "../deps/sharp.ts";
@@ -94,14 +95,16 @@ export function transformImages(userOptions?: Partial<Options>) {
 
     async function process(_: Page[], allPages: Page[]) {
       // Load all static files that must be transformed
-      await site.filesToPages(filter);
+      await filesToPages(site.files, site.pages, filter);
 
       const files = allPages.filter(filter);
 
-      if (files.length === 0) {
-        log.info(
-          "[transform_images plugin] No images found. Make sure to add them with <gray>site.add()</gray> and set the <gray>transformImages</gray> data key",
-        );
+      const hasPages = warnUntil(
+        "[transform_images plugin] No images to transform found. Make sure to add them with <code>site.add()</code>",
+        files.length,
+      );
+
+      if (!hasPages) {
         return;
       }
 
@@ -187,7 +190,7 @@ async function transform(
   const ext = page.src.ext;
   const format = transformation.format;
 
-  const ops = ext === ".gif" && (!format || format === "gif")
+  const ops = isAnimated(ext.slice(1)) && (!format || isAnimated(format))
     ? { pages: -1 }
     : {};
 
@@ -210,7 +213,10 @@ async function transform(
 
       default:
         if (!options.functions[name]) {
-          throw new Error(`Unknown transformation: ${name}`);
+          log.error(
+            `[transform_images plugin] Unknown transformation: ${name}`,
+          );
+          continue;
         }
 
         if (Array.isArray(args)) {
@@ -291,4 +297,8 @@ declare global {
       transformImages?: Transformation | Transformation[];
     }
   }
+}
+
+function isAnimated(format: unknown): boolean {
+  return typeof format === "string" && (format === "gif" || format === "webp");
 }

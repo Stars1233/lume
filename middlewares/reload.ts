@@ -5,16 +5,21 @@ import reloadClient from "./reload_client.js";
 
 import type { Middleware } from "../core/server.ts";
 import type { Watcher } from "../core/watcher.ts";
+import type DebugBar from "../core/debugbar.ts";
 
 export interface Options {
+  /** The watcher instance to use */
   watcher: Watcher;
+  /** The base path of the site. It's required by the reload script */
   basepath: string;
+  /** The debug bar instance to use */
+  debugBar?: DebugBar;
 }
 
 /** Middleware to hot reload changes */
 export function reload(options: Options): Middleware {
   const sockets = new Set<WebSocket>();
-  const { watcher } = options;
+  const { watcher, debugBar } = options;
 
   // Keep track of the change revision. A watch change
   // can be dispatched in-between the browser loading
@@ -42,12 +47,15 @@ export function reload(options: Options): Middleware {
       type: "update",
       revision,
       files: Array.from(files).map((file) => normalizePath(file)),
+      data: debugBar,
     });
+
     sockets.forEach((socket) => {
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(message);
       }
     });
+
     console.log("Changes sent to the browser");
   });
 
@@ -67,7 +75,7 @@ export function reload(options: Options): Middleware {
         }
 
         // Tell the browser about the most recent revision
-        socket.send(JSON.stringify({ type: "init", revision }));
+        socket.send(JSON.stringify({ type: "init", revision, data: debugBar }));
 
         sockets.add(socket);
       };
@@ -98,7 +106,9 @@ export function reload(options: Options): Middleware {
       }
 
       const source =
-        `${reloadClient}; liveReload(${revision}, "${options.basepath}", ${response.status});`;
+        `${reloadClient}; liveReload(${revision}, "${options.basepath}", ${response.status}, "${
+          debugBar?.url || ""
+        }");`;
       const integrity = await computeSourceIntegrity(source);
 
       // Add live reload script and pass initial revision

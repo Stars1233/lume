@@ -72,8 +72,10 @@ export function redirects(userOptions?: Options) {
         : options.output;
 
       if (!outputFn) {
-        log.error(`[redirects] Invalid output format: ${options.output}`);
-        throw new Error(`Invalid output format: ${options.output}`);
+        log.fatal(
+          `[redirects plugin] Invalid output format: ${options.output}`,
+        );
+        return;
       }
 
       redirects.sort((a, b) => a[0].localeCompare(b[0]));
@@ -123,7 +125,7 @@ function html(redirects: Redirect[], site: Site): void {
   <a href="${to}">Click here if you are not redirected.</a>
 </body>
 </html>`;
-    const page = Page.create({ url, content, isRedirect: true });
+    const page = Page.create({ url, content, unlisted: true });
     site.pages.push(page);
   }
 }

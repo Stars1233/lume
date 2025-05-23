@@ -151,10 +151,12 @@ snapshot[`slugify_urls plugin 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
       tags: "Array(0)",
+      title: "/803nfon-sfodij/-/",
       url: "/803nfon-sfodij/-/",
     },
     src: {
@@ -179,6 +181,7 @@ snapshot[`slugify_urls plugin 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
@@ -204,10 +207,12 @@ snapshot[`slugify_urls plugin 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
       tags: "Array(0)",
+      title: "filloas-con-nocilla",
       url: "/filloas-con-nocilla/",
     },
     src: {
@@ -232,6 +237,7 @@ snapshot[`slugify_urls plugin 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
@@ -260,6 +266,7 @@ snapshot[`slugify_urls plugin 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
@@ -288,6 +295,7 @@ snapshot[`slugify_urls plugin 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
@@ -451,10 +459,12 @@ snapshot[`slugify_urls plugin (static files) 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
       tags: "Array(0)",
+      title: "/803nfon-sfodij/-/",
       url: "/803nfon-sfodij/-/",
     },
     src: {
@@ -479,6 +489,7 @@ snapshot[`slugify_urls plugin (static files) 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
@@ -504,10 +515,12 @@ snapshot[`slugify_urls plugin (static files) 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
       tags: "Array(0)",
+      title: "filloas-con-nocilla",
       url: "/filloas-con-nocilla/",
     },
     src: {
@@ -532,6 +545,7 @@ snapshot[`slugify_urls plugin (static files) 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
@@ -560,6 +574,7 @@ snapshot[`slugify_urls plugin (static files) 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
@@ -588,6 +603,7 @@ snapshot[`slugify_urls plugin (static files) 3`] = `
       page: [
         "src",
         "data",
+        "isCopy",
       ],
       paginate: "paginate",
       search: [],
