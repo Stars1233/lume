@@ -54,5 +54,10 @@
     "plugins": [
       "./lint.ts"
     ]
+  },
+  "allowScripts": {
+    "deny": [
+      "npm:sharp"
+    ]
   }
 }

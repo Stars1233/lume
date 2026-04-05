@@ -1,1 +1,1 @@
-export type { Graph, Thing } from "npm:schema-dts@1.1.5";
+export type { Graph, Thing } from "npm:schema-dts@2.0.0";
