@@ -14,7 +14,7 @@ Go to the `v1` branch to see the changelog of Lume 1.
 
 ### Fixed
 - Duplicated pages throws an error instead of using the `log.error` helper.
-- Updated dependencies: `schema-dts`, `esbuild`, `sass`, `terser`, `katex`, `satori`, `zip-js`, `xml`, `deno-loader`, `pug`, `tailwindcss`, `decap-cms`, `partytown`, `unocss` and icons.
+- Updated dependencies: `schema-dts`, `esbuild`, `sass`, `terser`, `katex`, `satori`, `zip-js`, `xml`, `deno-loader`, `pug`, `tailwindcss`, `decap-cms`, `partytown`, `unocss`, `pagefind` and icons.
 
 ## [3.2.3] - 2026-03-11
 ### Fixed

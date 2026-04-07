@@ -210,78 +210,82 @@ export function pagefind(userOptions?: Options) {
       const { containerId, globalVariable, ...ui } = options.ui;
 
       site.process([".html"], function processPagefindUI(pages) {
+        // Generate the JS code to insert in all pages
+        const uiSettings = {
+          element: `#${containerId}`,
+          ...ui,
+          bundlePath: site.url(posix.join(options.outputPath, "/")),
+          baseUrl: site.url("/"),
+          processTerm: ui.processTerm ? ui.processTerm.toString() : undefined,
+          processResult: ui.processResult
+            ? ui.processResult.toString()
+            : undefined,
+        };
+        let code = `new PagefindUI(${JSON.stringify(uiSettings)});`;
+        if (globalVariable) {
+          code = `window["${globalVariable}"] = ${code}`;
+        }
+        code = `window.addEventListener('DOMContentLoaded',()=>{${code}});`;
+
+        const highlightCode = ui.highlightParam
+          ? `import "${
+            site.url(
+              `${posix.join(options.outputPath, "pagefind-highlight.js")}`,
+            )
+          }";
+            new PagefindHighlight({ highlightParam: ${
+            JSON.stringify(ui.highlightParam)
+          } });
+            `
+          : "";
+
         for (const page of pages) {
           const { document } = page;
           const container = document.getElementById(containerId!);
 
           // Insert UI styles and scripts
-          if (container) {
-            const styles = document.createElement("link");
-            styles.setAttribute("rel", "stylesheet");
-            styles.setAttribute(
-              "href",
-              site.url(
-                `${posix.join(options.outputPath, "pagefind-ui.css")}`,
-              ),
-            );
+          if (!container) {
+            continue;
+          }
+          const styles = document.createElement("link");
+          styles.setAttribute("rel", "stylesheet");
+          styles.setAttribute(
+            "href",
+            site.url(
+              `${posix.join(options.outputPath, "pagefind-ui.css")}`,
+            ),
+          );
 
-            // Insert before other styles to allow overriding
-            const first = document.head.querySelector(
-              "link[rel=stylesheet],style",
-            );
-            if (first) {
-              document.head.insertBefore(styles, first);
-            } else {
-              document.head.append(styles);
-            }
+          // Insert before other styles to allow overriding
+          const first = document.head.querySelector(
+            "link[rel=stylesheet],style",
+          );
+          if (first) {
+            document.head.insertBefore(styles, first);
+          } else {
+            document.head.append(styles);
+          }
 
-            const script = document.createElement("script");
-            script.setAttribute("type", "text/javascript");
-            script.setAttribute(
-              "src",
-              site.url(
-                `${posix.join(options.outputPath, "pagefind-ui.js")}`,
-              ),
-            );
-            document.head.append(script);
+          const script = document.createElement("script");
+          script.setAttribute("type", "text/javascript");
+          script.setAttribute(
+            "src",
+            site.url(
+              `${posix.join(options.outputPath, "pagefind-ui.js")}`,
+            ),
+          );
+          document.head.append(script);
 
-            const uiSettings = {
-              element: `#${containerId}`,
-              ...ui,
-              bundlePath: site.url(posix.join(options.outputPath, "/")),
-              baseUrl: site.url("/"),
-              processTerm: ui.processTerm
-                ? ui.processTerm.toString()
-                : undefined,
-              processResult: ui.processResult
-                ? ui.processResult.toString()
-                : undefined,
-            };
-            let code = `new PagefindUI(${JSON.stringify(uiSettings)});`;
-            if (globalVariable) {
-              code = `window["${globalVariable}"] = ${code}`;
-            }
-            const init = document.createElement("script");
-            init.setAttribute("type", "text/javascript");
-            init.innerHTML =
-              `window.addEventListener('DOMContentLoaded',()=>{${code}});`;
-            document.head.append(init);
+          const init = document.createElement("script");
+          init.setAttribute("type", "text/javascript");
+          init.innerHTML = code;
+          document.head.append(init);
 
-            if (ui.highlightParam) {
-              const highlightScript = document.createElement("script");
-              highlightScript.setAttribute("type", "module");
-              highlightScript.innerHTML = `
-              import "${
-                site.url(
-                  `${posix.join(options.outputPath, "pagefind-highlight.js")}`,
-                )
-              }";
-              new PagefindHighlight({ highlightParam: ${
-                JSON.stringify(ui.highlightParam)
-              } });
-              `;
-              document.head.append(highlightScript);
-            }
+          if (highlightCode) {
+            const highlightScript = document.createElement("script");
+            highlightScript.setAttribute("type", "module");
+            highlightScript.innerHTML = highlightCode;
+            document.head.append(highlightScript);
           }
         }
       });
