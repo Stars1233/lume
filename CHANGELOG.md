@@ -6,14 +6,14 @@ and this project try to adheres to [Semantic Versioning](https://semver.org/).
 Go to the `v2` branch to see the changelog of Lume 2.
 Go to the `v1` branch to see the changelog of Lume 1.
 
-## [Unreleased]
+## [3.2.4] - 2026-04-10
 ### Added
-- `paginate.first` and `paginate.last` properties to get the first and last page of the pagination.
-- `feed` plugin: upgrade JSON output to JSON Feed 1.1.
-- `feed` plugin: add Atom feed support.
+- `paginate.first` and `paginate.last` properties to get the first and last page of the pagination [#827].
+- `feed` plugin: upgrade JSON output to JSON Feed 1.1 [#830].
+- `feed` plugin: add Atom feed support [#831].
 
 ### Fixed
-- Duplicated pages throws an error instead of using the `log.error` helper.
+- Duplicated pages now logs the error instead of throwing it.
 - Updated dependencies: `schema-dts`, `esbuild`, `sass`, `terser`, `katex`, `satori`, `zip-js`, `xml`, `deno-loader`, `pug`, `tailwindcss`, `decap-cms`, `partytown`, `unocss`, `pagefind`, `postcss` and icons.
 
 ## [3.2.3] - 2026-03-11
@@ -438,8 +438,11 @@ Go to the `v1` branch to see the changelog of Lume 1.
 [#817]: https://github.com/lumeland/lume/issues/817
 [#818]: https://github.com/lumeland/lume/issues/818
 [#823]: https://github.com/lumeland/lume/issues/823
+[#827]: https://github.com/lumeland/lume/issues/827
+[#830]: https://github.com/lumeland/lume/issues/830
+[#831]: https://github.com/lumeland/lume/issues/831
 
-[Unreleased]: https://github.com/lumeland/lume/compare/v3.2.3...HEAD
+[3.2.4]: https://github.com/lumeland/lume/compare/v3.2.3...v3.2.4
 [3.2.3]: https://github.com/lumeland/lume/compare/v3.2.2...v3.2.3
 [3.2.2]: https://github.com/lumeland/lume/compare/v3.2.1...v3.2.2
 [3.2.1]: https://github.com/lumeland/lume/compare/v3.2.0...v3.2.1
