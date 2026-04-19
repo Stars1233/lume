@@ -6,6 +6,10 @@ and this project try to adheres to [Semantic Versioning](https://semver.org/).
 Go to the `v2` branch to see the changelog of Lume 2.
 Go to the `v1` branch to see the changelog of Lume 1.
 
+## [3.2.5] - Unreleased
+### Fixed
+- google_fonts plugin ignores display parameter [#834]
+
 ## [3.2.4] - 2026-04-10
 ### Added
 - `paginate.first` and `paginate.last` properties to get the first and last page of the pagination [#827].
@@ -441,7 +445,9 @@ Go to the `v1` branch to see the changelog of Lume 1.
 [#827]: https://github.com/lumeland/lume/issues/827
 [#830]: https://github.com/lumeland/lume/issues/830
 [#831]: https://github.com/lumeland/lume/issues/831
+[#834]: https://github.com/lumeland/lume/issues/834
 
+[3.2.5]: https://github.com/lumeland/lume/compare/v3.2.4...HEAD
 [3.2.4]: https://github.com/lumeland/lume/compare/v3.2.3...v3.2.4
 [3.2.3]: https://github.com/lumeland/lume/compare/v3.2.2...v3.2.3
 [3.2.2]: https://github.com/lumeland/lume/compare/v3.2.1...v3.2.2

@@ -51,7 +51,7 @@ Deno.test("Use a placeholder", async (t) => {
       "display-font":
         "https://fonts.google.com/share?selection.family=Londrina+Sketch",
       "jp-font":
-        "https://fonts.google.com/share?selection.family=Zen+Maru+Gothic:wght@700&display=swap",
+        "https://fonts.google.com/share?selection.family=Zen+Maru+Gothic:wght@700&display=optional",
     },
   }));
 

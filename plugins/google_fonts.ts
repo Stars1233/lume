@@ -111,6 +111,7 @@ interface FontFace {
   file: string;
   range: string;
   subset: string;
+  display: string;
 }
 
 function extractFontFaces(css: string, name: string): FontFace[] {
@@ -125,6 +126,7 @@ function extractFontFaces(css: string, name: string): FontFace[] {
     const stretch = fontFace.match(/font-stretch: ([^;]+);/)?.[1];
     const src = fontFace.match(/src: url\('?([^']+)'?\)/)?.[1];
     const range = fontFace.match(/unicode-range: ([^;]+);/)?.[1];
+    const display = fontFace.match(/font-display: ([^;]+);/)?.[1] ?? "swap";
 
     if (!subset) {
       subset = `[${unnamedSubsetId}]`;
@@ -150,6 +152,7 @@ function extractFontFaces(css: string, name: string): FontFace[] {
       src,
       range,
       file,
+      display,
     };
   });
 }
@@ -164,7 +167,7 @@ function generateCss(fontFaces: FontFace[], fontsFolder: string): string {
   font-stretch: ${fontFace.stretch ?? "normal"};
   src: url("${posix.join(fontsFolder, fontFace.file)}") format("woff2");
   unicode-range: ${fontFace.range};
-  font-display: swap;
+  font-display: ${fontFace.display};
 }
 `;
   }).join("\n");
@@ -175,7 +178,6 @@ function getCssUrl(fonts: string): string | undefined {
 
   // Share URL
   if (url.host === "fonts.googleapis.com" && url.pathname === "/css2") {
-    url.searchParams.append("display", "swap");
     return url.href;
   }
 
@@ -189,6 +191,10 @@ function getCssUrl(fonts: string): string | undefined {
     selection.split("|").forEach((family) => {
       apiUrl.searchParams.append("family", family);
     });
+    apiUrl.searchParams.append(
+      "display",
+      url.searchParams.get("display") ?? "swap",
+    );
     return apiUrl.href;
   }
 }
