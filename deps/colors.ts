@@ -1,1 +1,1 @@
-export * from "jsr:@std/fmt@1.0.9/colors";
+export * from "jsr:@std/fmt@1.0.10/colors";

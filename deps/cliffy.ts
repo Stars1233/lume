@@ -1,1 +1,1 @@
-export * from "jsr:@cliffy/command@1.0.0";
+export * from "jsr:@cliffy/command@1.0.1";

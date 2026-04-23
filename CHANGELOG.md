@@ -9,7 +9,7 @@ Go to the `v1` branch to see the changelog of Lume 1.
 ## [3.2.5] - Unreleased
 ### Fixed
 - `google_fonts` plugin ignores display parameter [#834]
-- Updated dependencies: `pagefind`, `postcss`, `autoprefixer`, `html-validate`, `decap-cms` and some icons.
+- Updated dependencies: `std`, `cliffy`, `pagefind`, `postcss`, `autoprefixer`, `html-validate`, `decap-cms`, `tailwindcss`, `terser` and some icons.
 
 ## [3.2.4] - 2026-04-10
 ### Added
