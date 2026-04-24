@@ -12,6 +12,7 @@ import type { default as Formats, Format } from "./formats.ts";
 import type DataLoader from "./data_loader.ts";
 import type { ScopeFilter } from "./scopes.ts";
 import type { ComponentLoader, Components } from "./components.ts";
+import { log } from "./utils/log.ts";
 
 export interface Options {
   formats: Formats;
@@ -560,9 +561,8 @@ export default class Source {
     const { loader, ext } = format;
 
     if (!loader) {
-      throw new Error(
-        `Missing loader for the page ${entry.path}`,
-      );
+      log.error(`[loader] Missing loader for the page ${entry.path}`);
+      return;
     }
 
     const { basename, ...parsedData } = runBasenameParsers(
@@ -579,7 +579,17 @@ export default class Source {
     });
 
     // Load and merge the page data
-    const pageData = await entry.getContent(loader);
+    let pageData: RawData = {};
+    try {
+      pageData = await entry.getContent(loader);
+    } catch (error) {
+      log.error(
+        `[loader] Error loading the file "${entry.path}": ${
+          (error as Error).message
+        }`,
+      );
+      return;
+    }
     page.data = mergeData(
       dirData,
       { basename },
